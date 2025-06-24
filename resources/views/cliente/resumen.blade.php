@@ -1,51 +1,107 @@
 @extends('layouts.cliente')
 
 @section('titulo', 'Resumen del Pedido')
-@section('cabecera', 'Resumen del Pedido')
 
 @section('contenido')
-    <div class="bg-white p-8 rounded-2xl shadow-xl text-center max-w-2xl mx-auto mt-10 border border-gray-200">
+<div class="min-h-screen bg-gray-100 p-6 flex  gap-6">
+    
+    {{-- Columna izquierda (vacía por ahora) --}}
+    <aside class="w-full md:w-1/3 bg-white rounded-lg shadow p-4">
+        {{-- Espacio reservado para filtros o menú lateral --}}
+        <p>por ver que implementar</p>
+        <p>nombre</p>
+        <p>apeldido</p>
+        <p>cliente</p>
+        
+    </aside>
 
-        <div class="text-center mb-16 " style="background-color:white;">
-            <p class="text-green-700 text-lg font-semibold">✅ Tu pedido ha sido registrado con éxito.</p>
-            <p class="text-gray-600">Será procesado por el área de ventas.</p>
-        </div>
+    {{-- Columna derecha --}}
+    <main class="w-full md:w-2/3 bg-white rounded-2xl shadow-lg p-8 border border-gray-300">
+        
+        {{-- Título grande --}}
+        <h2 class="text-4xl font-extrabold text-center mb-8 text-gray-800" style="font-size: 30px; font-family:'Times New Roman', Times, serif;"  >
+            Resumen del Pedido
+        </h2>
 
-        <div class="overflow-x-auto ">
-            <table class="min-w-full table-auto text-sm text-left border border-gray-300 rounded-lg overflow-hidden shadow-sm">
-                <thead class="bg-gradient-to-r from-blue-500 to-blue-700 text-black">
+        {{-- Tabla centrada, ancho automático según contenido, con bordes --}}
+        <section class="overflow-x-auto mb-8">
+            <table class="table-auto mx-auto border border-gray-300 rounded-lg overflow-hidden">
+                <thead class="bg-blue-600 text-black text-lg">
                     <tr>
-                        <th class="px-6 py-3 font-semibold">📦 Producto</th>
-                        <th class="px-6 py-3 font-semibold">🔢 Cantidad</th>
-                        <th class="px-6 py-3 font-semibold">📐 Volumen (cm³)</th>
+                        <th class="px-6 py-3 border-b border-gray-300">CODIGO</th>
+                        <th class="px-6 py-3 border-b border-gray-300">IMAGEN</th>
+                        <th class="px-6 py-3 border-b border-gray-300">📦 Producto</th>
+                        <th class="px-6 py-3 border-b border-gray-300">🔢 Cantidad</th>
+                        <th class="px-6 py-3 border-b border-gray-300">PRECIO UNITARIO</th>
+                        <th class="px-6 py-3 border-b border-gray-300">PRECIO TOTAL</th>
+                        <th class="px-6 py-3 border-b border-gray-300">📐 Volumen (POR VER) (cm³)</th>
+                        <th class="px-6 py-3 border-b border-gray-300">ACCIONES</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody class="divide-y divide-gray-200 text-base text-gray-700">
                     @foreach ($pedido->detalles as $detalle)
-                        <tr>
-                            <td class="px-6 py-3">{{ $detalle->producto->nombre }}</td>
-                            <td class="px-6 py-3">{{ $detalle->cantidad }}</td>
-                            <td class="px-6 py-3">
-                                {{ $detalle->producto->alto * $detalle->producto->ancho * $detalle->producto->largo * $detalle->cantidad }}
-                            </td>
-                        </tr>
+                    <tr class="hover:bg-gray-100">
+                        <td class="px-6 py-4 border-b border-gray-200">
+                            {{ $detalle->cantidad }}
+                        </td>
+                        <td class="px-6 py-4 border-b border-gray-200">
+                            {{ $detalle->cantidad }}
+                        </td>
+                        <td class="px-6 py-4 border-b border-gray-200">
+                            {{ $detalle->producto->nombre }}
+                        </td>
+                        <td class="px-6 py-4 border-b border-gray-200">
+                            {{ $detalle->cantidad }}
+                        </td>
+                        <td class="px-6 py-4 border-b border-gray-200">
+                            {{ $detalle->cantidad }}
+                        </td>
+                        <td class="px-6 py-4 border-b border-gray-200">
+                            {{ $detalle->cantidad }}
+                        </td>
+                        <td class="px-6 py-4 border-b border-gray-200">
+                            {{ $detalle->producto->alto
+                             * $detalle->producto->ancho
+                             * $detalle->producto->largo
+                             * $detalle->cantidad }}
+                        </td>
+                        <td class="px-6 py-4 border-b border-gray-200 text-center">
+                            <button type="button"
+                                    class="btn btn-danger">
+                                ELIMINAR
+                            </button>
+                        </td>
+
+                    </tr>
                     @endforeach
                 </tbody>
             </table>
-        </div>
+        </section>
 
-        <div class="mt-6 flex justify-between items-center">
-            <a href="/cliente/inicio" class="text-blue-700 hover:underline text-sm flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                </svg>
+        {{-- Mensaje de confirmación --}}
+        <article class="bg-green-50 text-green-800 border-l-4 border-green-500 rounded-md p-6 mb-6 text-lg">
+                <p class="font-semibold flex items-center">
+                    <span class="mr-2 text-2xl">✅</span>
+                    Tu pedido ha sido registrado con éxito.
+                </p>
+                <p class="text-gray-600 mt-1">Será procesado por el área de ventas.</p>
+        </article>
+
+        {{-- Botones en las esquinas --}}
+            <div class="mt-8 flex justify-between items-center w-full">
+                <a href="/cliente/inicio" style="margin-left: 2rem;"
+                class="btn btn-primary btn-lg fs-4"
+                role="button">                
                 Volver al inicio
-            </a>
+                </a>
+                <a href="{{ route('cliente.facturar.form', $pedido->id) }}" style="margin-right: 2rem;"
+                class="btn btn-success btn-lg d-inline-flex align-items-center"
+                role="button">
+                <i class="bi bi-credit-card-fill fs-4 me-2"></i>
+                Ir a Facturar
+                </a>
+            </div>
 
-            <a href="{{ route('cliente.facturar.form', $pedido->id) }}"
-                class="bg-600 text-black text-base font-semibold px-6 py-2 rounded-lg hover:bg-green-700 shadow-md transition-all duration-300">
-                💳 Ir a Facturar
-            </a>
-        </div>
-    </div>
+    </main>
+</div>
 @endsection
