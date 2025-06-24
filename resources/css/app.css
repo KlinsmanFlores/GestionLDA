@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+.login-bg {
+    background: linear-gradient(120deg, #0f044c, #121063, #3e2ecf);
+    background-size: cover;
+    background-position: center;
+}
+
+.btn-gradient {
+    background: linear-gradient(to right, #6a11cb, #2575fc);
+    border: none;
+}
+
+.btn-gradient:hover {
+    background: linear-gradient(to right, #5b0ead, #1f60d6);
+}
