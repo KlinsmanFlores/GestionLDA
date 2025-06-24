@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container py-4">
-    <h2 class="text-2xl font-bold mb-4">Guías Asignadas</h2>
+    <h2 class="text-2xl font-bold mb-4" style="font-size: 20pt;">Guías Asignadas</h2>
 
     @if($guias->isEmpty())
         <div class="alert alert-info">No tienes guías asignadas actualmente.</div>

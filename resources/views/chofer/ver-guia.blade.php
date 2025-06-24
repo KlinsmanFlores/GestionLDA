@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container py-4">
-    <h2 class="text-2xl font-bold mb-4">Detalle de Guía</h2>
+    <h2 class="text-2xl font-bold mb-4" style="font-size: 20pt ;">Detalle de Guía</h2>
 
     <div class="bg-white shadow rounded p-4 mb-4">
         <p><strong>Guía ID:</strong> {{ $guia->id }}</p>

@@ -25,7 +25,7 @@
 
             <form action="{{ route('logistica.asignar.camion', $pedido->id) }}" method="POST" class="mt-3">
                 @csrf
-                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                <button type="submit" class="btn btn-primary me-md-2" type="button">
                     Asignar Camión
                 </button>
             </form>

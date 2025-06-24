@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container mx-auto py-6">
-    <h2 class="text-2xl font-bold mb-6">Guía de Remisión Generada</h2>
+    <h2 class="text-2xl font-bold mb-6" style="font-size: 25pt;">Guía de Remisión Generada</h2>
 
     <div class="bg-white shadow rounded p-6 mb-4">
         <p><strong>Guía ID:</strong> {{ $guia->id }}</p>
