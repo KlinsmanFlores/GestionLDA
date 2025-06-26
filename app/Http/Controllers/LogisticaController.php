@@ -7,8 +7,49 @@ use App\Models\Pedido;
 use App\Models\Flota;
 use App\Models\GuiaDeRemision;
 
+
+
+use App\Models\Usuario;
+use App\Models\Logistica;
+
 class LogisticaController extends Controller
 {
+
+    public function create(Usuario $usuario)
+    {
+        if ($usuario->id_rol !== 5) {
+            abort(403, 'Acceso denegado: usuario no es logística.');
+        }
+        return view('admin.logisticas.crear', compact('usuario'));
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'id_usuario'    => 'required|exists:usuarios,id_usuario',
+            'almacen_base'  => 'required|string|max:150',
+            'area_asignada' => 'required|string|max:100',
+        ]);
+
+        $usuario = Usuario::findOrFail($data['id_usuario']);
+        if ($usuario->id_rol !== 5) {
+            abort(403, 'Acceso denegado: usuario no es logística.');
+        }
+
+        Logistica::create([
+            'id_usuario'    => $data['id_usuario'],
+            'almacen_base'  => $data['almacen_base'],
+            'area_asignada' => $data['area_asignada'],
+        ]);
+
+        return redirect()->route('admin.usuarios.roles')
+                        ->with('success', 'Logística registrada correctamente.');
+    }
+
+
+
+
+
     public function pedidosPendientes()
     {
         $pedidos = Pedido::with('cliente', 'detalles.producto')
@@ -51,7 +92,7 @@ class LogisticaController extends Controller
 
         //dd($camionDisponible);
 
-
+        /***/
         // Crear guía de remisión
         $guia = GuiaDeRemision::create([
             'pedido_id' => $pedido->id,
@@ -63,6 +104,8 @@ class LogisticaController extends Controller
         $guia->load('flota');
 
         return view('logistica.guia', compact('guia'));
+
+
     }
 
 

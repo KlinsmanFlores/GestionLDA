@@ -21,20 +21,59 @@ Route::get('/admin/login', [AdminLoginController::class, 'create'])->name('admin
 Route::post('/admin/login', [AdminLoginController::class, 'store']);
 
 // Redirección por roles
-Route::get('/admin/usuarios/crear', [UsuarioInternoController::class, 'create'])
-    ->middleware('auth')->name('admin.usuarios.create');
+//Route::get('/admin/usuarios/crear', [UsuarioInternoController::class, 'create'])
+//    ->middleware('auth')->name('admin.usuarios.create');
 
-Route::post('/admin/usuarios/crear', [UsuarioInternoController::class, 'store'])
-    ->middleware('auth')->name('admin.usuarios.store');
+//Route::post('/admin/usuarios/crear', [UsuarioInternoController::class, 'store'])
+//    ->middleware('auth')->name('admin.usuarios.store');
 
-// Módulos por tipo de usuario - de prueba revisar final
-Route::middleware(['auth'])->group(function () {
-    //Route::get('/admin/inicio', fn() => 'Bienvenido Admin');
-    Route::get('/cliente/inicio', fn() => 'Bienvenido Cliente');
-    //Route::get('/chofer/inicio', fn() => 'Bienvenido Chofer');
-    //Route::get('/vendedor/inicio', fn() => 'Bienvenido Vendedor');
-    //Route::get('/logistica/inicio', fn() => 'Bienvenido Logística');
+
+Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
+
+    // 1. Selector de rol
+    Route::get('usuarios/roles', [UsuarioInternoController::class, 'chooseRole'])
+        ->name('usuarios.roles');
+
+    // 2. Formulario de creación de usuario (recibe id_rol en la URL)
+    Route::get('usuarios/crear/{id_rol}', [UsuarioInternoController::class, 'createByRole'])
+        ->where('id_rol', '[345]')
+        ->name('usuarios.create');
+
+    // 3. Store de usuario: crea el registro en usuarios y redirige
+    Route::post('usuarios/crear/{id_rol}', [UsuarioInternoController::class, 'store'])
+        ->where('id_rol', '[345]')
+        ->name('usuarios.store');
+
+    // 4. Flujo de tablas hijas, por separado:
+
+    // 4a. Choferes
+    // Mostrar formulario para completar datos de chofer tras crear el usuario
+    Route::get('choferes/crear/{usuario}', [ChoferController::class, 'create'])
+        ->name('choferes.create');
+    // Guardar datos de chofer
+    Route::post('choferes', [ChoferController::class, 'store'])
+        ->name('choferes.store');
+
+    // 4b. Vendedores
+    Route::get('vendedores/crear/{usuario}', [VendedorController::class, 'create'])
+        ->name('vendedores.create');
+    Route::post('vendedores', [VendedorController::class, 'store'])
+        ->name('vendedores.store');
+
+    // 4c. Logísticas
+    Route::get('logisticas/crear/{usuario}', [LogisticaController::class, 'create'])
+        ->name('logisticas.create');
+    Route::post('logisticas', [LogisticaController::class, 'store'])
+        ->name('logisticas.store');
+
 });
+
+
+
+
+
+
+
 
 //rutas para registro del cliente
 Route::get('/cliente/registro', [ClienteAuthController::class, 'showRegisterForm'])->name('cliente.register.form');
@@ -44,6 +83,17 @@ Route::post('/cliente/registro', [ClienteAuthController::class, 'register'])->na
 Route::get('/cliente/login', [ClienteAuthController::class, 'showLoginForm'])->name('cliente.login.form');
 Route::post('/cliente/login', [ClienteAuthController::class, 'login'])->name('cliente.login');
 
+
+
+
+
+
+
+
+
+
+
+
 //rutas crear pedido
 Route::middleware(['auth'])->group(function () {
     Route::get('/cliente/pedido/crear', [PedidoController::class, 'crear'])->name('cliente.pedido.crear');
@@ -51,9 +101,30 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
+
+
+
+
+
+
+
+
+
+
 //rutas de facturacion
 Route::post('/cliente/facturar/{id}', [PedidoController::class, 'facturar'])->name('cliente.facturar');
 Route::get('/cliente/facturar/{id}', [PedidoController::class, 'formularioFacturar'])->name('cliente.facturar.form');
+
+
+
+
+
+
+
+
+
+
+
 
 
 //ruta del factrua pendiente en el vendedor
@@ -61,6 +132,8 @@ Route::middleware('auth')->group(function () {
     //vendedor
     Route::get('/vendedor/pedidos', [VendedorController::class, 'pedidosPendientes'])->name('vendedor.pedidos');
     Route::post('/vendedor/pedidos/{id}/confirmar', [VendedorController::class, 'confirmarFactura'])->name('vendedor.confirmar.factura');
+    
+
     
 
     //logistica page principal

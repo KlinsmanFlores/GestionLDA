@@ -13,8 +13,14 @@ return new class extends Migration
     {
         Schema::create('choferes', function (Blueprint $table) {
             $table->id('id_chofer');
-            $table->string('licencia', 50);
-            $table->foreign('id_chofer')->references('id_usuario')->on('usuarios')->onDelete('cascade');
+
+            // modificado: agregada columna de FK a usuarios
+            $table->unsignedBigInteger('id_usuario'); // modificado
+            $table->foreign('id_usuario')
+                ->references('id_usuario')->on('usuarios')
+                  ->onDelete('cascade'); // modificado
+
+            $table->string('licencia', 50)->nullable();
             $table->timestamps();
         });
     }

@@ -5,51 +5,73 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Usuario;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
 
 class UsuarioInternoController extends Controller
 {
-    public function create()
+    /**
+     * Mostrar la vista para elegir rol.
+     */
+    public function chooseRole()
     {
-        // Asegurar que solo el admin acceda
-        if (Auth::user()->id_rol != 1) {
-            abort(403, 'Acceso no autorizado.');
-        }
-
-        return view('admin.usuarios.crear');
+        return view('admin.usuarios.choose-role');
     }
 
-
-
-
-    //--------------
-    public function store(Request $request)
+    /**
+     * Mostrar formulario de creación de usuario según rol.
+     *
+     * @param  int  $id_rol
+     */
+    public function createByRole($id_rol)
     {
-        if (Auth::user()->id_rol != 1) {
-            abort(403, 'Acceso no autorizado.');
-        }
+        return view('admin.usuarios.crear', compact('id_rol'));
+    }
 
-        $request->validate([
-            'nombre' => 'required|string|max:100',
-            'apellidos' => 'required|string|max:100',
-            'dni' => 'required|string|max:20|unique:usuarios,dni',
-            'correo' => 'required|email|unique:usuarios,correo',
-            'telefono' => 'nullable|string|max:50',
+    /**
+     * Almacenar un nuevo usuario y redirigir
+     * al formulario de Chofer (rol 3).
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id_rol
+     */
+    public function store(Request $request, $id_rol)
+    {
+        // Validación de datos de usuario
+        $data = $request->validate([
+            'nombre'     => 'required|string|max:100',
+            'apellidos'  => 'required|string|max:100',
+            'dni'        => 'required|string|max:20|unique:usuarios,dni',
+            'correo'     => 'required|email|unique:usuarios,correo',
+            'telefono'   => 'nullable|string|max:50',
             'contrasena' => 'required|string|min:6',
-            'id_rol' => 'required|in:3,4,5' // Solo transportista, vendedor, logística
         ]);
 
-        Usuario::create([
-            'nombre' => $request->nombre,
-            'apellidos' => $request->apellidos,
-            'dni' => $request->dni,
-            'correo' => $request->correo,
-            'telefono' => $request->telefono,
-            'contrasena' => Hash::make($request->contrasena),
-            'id_rol' => $request->id_rol
+        // Crear usuario
+        $user = Usuario::create([
+            'nombre'     => $data['nombre'],
+            'apellidos'  => $data['apellidos'],
+            'dni'        => $data['dni'],
+            'correo'     => $data['correo'],
+            'telefono'   => $data['telefono'] ?? null,
+            'contrasena' => bcrypt($data['contrasena']),
+            'id_rol'     => $id_rol,
         ]);
 
-        return redirect()->route('admin.usuarios.create')->with('success', 'Trabajador registrado correctamente.');
+        // Redirigir según rol seleccionado
+        switch ($id_rol) {
+            case 3:
+                // Chofer
+                return redirect()->route('admin.choferes.create', ['usuario' => $user->id_usuario]);
+
+            case 4:
+                // Vendedor
+                return redirect()->route('admin.vendedores.create', ['usuario' => $user->id_usuario]); // modificado
+
+            case 5:
+                // Logística
+                return redirect()->route('admin.logisticas.create', ['usuario' => $user->id_usuario]); // modificado
+
+            default:
+                abort(400, 'Rol no soportado para este flujo.');
+        }
     }
 }

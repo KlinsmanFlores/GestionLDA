@@ -61,7 +61,7 @@ class AdminLoginController extends Controller
         // Redirección por rol
         switch ($usuario->id_rol) {
             case 1:
-                return redirect()->route('admin.usuarios.create'); 
+                return redirect()->route('admin.usuarios.roles');  // vamos a cambiar para probar create  ,, choserol
             case 3:
                 return redirect()->route('chofer.guias');
             case 4:

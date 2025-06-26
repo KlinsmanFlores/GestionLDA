@@ -18,7 +18,13 @@ return new class extends Migration
             $table->string('numero', 50)->nullable();
             $table->string('correo', 150)->nullable();
             $table->string('direccion', 255)->nullable();
-            $table->foreign('id_cliente')->references('id_usuario')->on('usuarios')->onDelete('cascade');
+
+            // modificado: agregada columna de FK a usuarios
+            $table->unsignedBigInteger('id_usuario'); // modificado
+            $table->foreign('id_usuario')           
+                ->references('id_usuario')->on('usuarios')
+                ->onDelete('cascade'); // modificado
+
             $table->timestamps();
         });
     }

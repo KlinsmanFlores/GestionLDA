@@ -9,13 +9,19 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
+        Schema::dropIfExists('vendedores');
         Schema::create('vendedores', function (Blueprint $table) {
-            $table->id('id_vendedor'); // FK con usuarios
-            $table->string('zona', 100)->nullable(); // Por ejemplo: "Zona Sur"
-            $table->decimal('comision', 5, 2)->default(0.00); // Porcentaje de comisión
-            $table->foreign('id_vendedor')->references('id_usuario')->on('usuarios')->onDelete('cascade');
+            // PK autoincremental
+            $table->id('id_vendedor');
+            // FK a usuarios (1:1)
+            $table->unsignedBigInteger('id_usuario')->unique();
+            $table->foreign('id_usuario')
+                ->references('id_usuario')->on('usuarios')
+                ->onDelete('cascade');
+            $table->string('zona', 100)->nullable();
+            $table->decimal('comision', 5, 2)->default(0.00);
             $table->timestamps();
         });
     }
