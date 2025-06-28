@@ -7,9 +7,18 @@ use App\Models\DetallePedido;
 use App\Models\Producto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Services\OrderCalculationService;
 
 class PedidoController extends Controller
 {
+    protected OrderCalculationService $orderCalc;
+
+    public function __construct(OrderCalculationService $orderCalc)
+    {
+        $this->orderCalc = $orderCalc;
+        // $this->middleware('auth');
+    }
+
     public function crear()
     {
         $productos = Producto::all();
@@ -19,70 +28,94 @@ class PedidoController extends Controller
     public function guardar(Request $request)
     {
         $request->validate([
-            'productos.*.id' => 'required|exists:producto,id_producto',
+            'productos.*.id'       => 'required|exists:producto,id_producto',
             'productos.*.cantidad' => 'required|integer|min:1',
         ]);
 
+        // Crear cabecera
         $pedido = Pedido::create([
-            'id_cliente' => Auth::id(),
-            'estado' => 'pendiente',
+            'id_cliente'    => Auth::id(),
+            'fecha'         => now(),
+            'estado'        => 'pendiente',
+            'estado_envio'  => 'pendiente',
+            'estado_factura'=> 'pendiente',
         ]);
 
-        foreach ($request->productos as $productoData) {
-            $producto = Producto::find($productoData['id']);
-
-            $volumen_unitario = ($producto->alto ?? 1) * ($producto->ancho ?? 1) * ($producto->largo ?? 1);
-            $cantidad = $productoData['cantidad'];
-            $volumen_total = $volumen_unitario * $cantidad;
+        $items = [];
+        foreach ($request->productos as $p) {
+            $prod   = Producto::find($p['id']);
+            $volUnit = ($prod->alto ?: 1) * ($prod->ancho ?: 1) * ($prod->largo ?: 1);
 
             DetallePedido::create([
-                'pedido_id' => $pedido->id,
-                'producto_id' => $producto->id_producto,
-                'cantidad' => $cantidad,
-                'volumen_unitario' => $volumen_unitario,
-                'volumen_total' => $volumen_total,
+                'pedido_id'        => $pedido->id,
+                'producto_id'      => $prod->id_producto,
+                'cantidad'         => $p['cantidad'],
+                'volumen_unitario' => $volUnit,
+                'volumen_total'    => $volUnit * $p['cantidad'],
             ]);
+
+            $items[] = [
+                'pvp'              => $prod->pvp,
+                'cantidad'         => $p['cantidad'],
+                'volumen_unitario'=> $volUnit,
+                'peso'             => $prod->peso,
+            ];
         }
 
-        return view('cliente.resumen', [
-            'pedido' => $pedido->load('detalles.producto'),
-        ]);
+        // Cálculos
+        $subtotal = $this->orderCalc->calculateSubtotal($items);
+        $igv      = $this->orderCalc->calculateIGV($subtotal);
+        $total    = $this->orderCalc->calculateTotal($subtotal, $igv);
+        $volumen  = $this->orderCalc->calculateVolumen($items);
+        $peso     = $this->orderCalc->calculatePeso($items);
+
+        $pedido->update(compact('subtotal','igv','total'));
+        $pedido->load('detalles.producto');
+
+        return view('cliente.resumen', compact('pedido','subtotal','igv','total','volumen','peso'));
     }
 
-    public function facturar(Request $request, $id)
+    // ————— Editar detalle —————
+
+    public function editarDetalle(DetallePedido $detalle)
     {
+        if ($detalle->pedido->id_cliente !== Auth::id()) {
+            abort(403);
+        }
+
+        $detalle->load('producto');
+        return view('cliente.pedido.editar-detalle', compact('detalle'));
+    }
+
+    public function actualizarDetalle(Request $request, DetallePedido $detalle)
+    {
+        if ($detalle->pedido->id_cliente !== Auth::id()) {
+            abort(403);
+        }
+
         $request->validate([
-            'ruc' => 'required|string|max:20',
-            'razon_social' => 'required|string|max:150',
-            'direccion_fiscal' => 'required|string|max:255',
-            'medio_pago' => 'required|string|max:50',
+            'cantidad' => 'required|integer|min:1',
         ]);
 
-        $pedido = Pedido::with('detalles.producto')->findOrFail($id);
+        $detalle->cantidad      = $request->cantidad;
+        $detalle->volumen_total = $detalle->volumen_unitario * $detalle->cantidad;
+        $detalle->save();
 
-        $subtotal = $pedido->detalles->sum(fn($d) => $d->cantidad * $d->producto->pvp);
-        $igv = $subtotal * 0.18;
-        $total = $subtotal + $igv;
-
-        $pedido->update([
-            'ruc' => $request->ruc,
-            'razon_social' => $request->razon_social,
-            'direccion_fiscal' => $request->direccion_fiscal,
-            'medio_pago' => $request->medio_pago,
-            'subtotal' => $subtotal,
-            'igv' => $igv,
-            'total' => $total,
-        ]);
-
-        return view('cliente.estado', ['pedido' => $pedido]);
-
+        return redirect()->back()
+                        ->with('success', 'Cantidad actualizada correctamente.');
     }
 
-    public function formularioFacturar($id)
+    // ————— Eliminar detalle —————
+
+    public function eliminarDetalle(DetallePedido $detalle)
     {
-        $pedido = Pedido::with('detalles.producto')->findOrFail($id);
-        return view('cliente.facturacion', compact('pedido'));
-    }  
+        if ($detalle->pedido->id_cliente !== Auth::id()) {
+            abort(403);
+        }
 
+        $detalle->delete();
 
+        return redirect()->back()
+                        ->with('success', 'Producto eliminado del pedido.');
+    }
 }

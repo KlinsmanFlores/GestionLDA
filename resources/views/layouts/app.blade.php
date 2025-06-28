@@ -30,6 +30,8 @@
                     class="d-inline-block rounded shadow"
                     style="object-fit: contain;">               
             Management Control System</a>
+            
+    
         </div>
     </nav>
 

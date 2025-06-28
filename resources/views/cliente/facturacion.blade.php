@@ -1,94 +1,105 @@
 @extends('layouts.cliente')
 
 @section('contenido')
-<div class="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-    <div class="w-full max-w-3xl bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
-        
-        {{-- Encabezado centrado y más grande --}}
-        <div class="mb-8 text-center">
-            <h2 class="text-5xl font-extrabold text-indigo-700" style="font-size: 25pt;">
-                🧾 Datos de Facturación
-            </h2>
-            <p class="text-lg text-gray-500 mt-2">
-                Completa los datos para generar tu factura
-            </p>
+    <div class="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+    <div class="w-full max-w-lg bg-white rounded-lg shadow-md p-6">
+        {{-- Logo --}}
+        <div class="flex justify-center mb-6">
+        <img src="{{ asset('img/logo2.png') }}" alt="Logo Empresa" class="h-16">
         </div>
 
-        <form action="{{ route('cliente.facturar', $pedido->id) }}" method="POST">
-            @csrf
+        <h2 class="text-2xl font-semibold text-gray-800 text-center mb-6">
+        Datos de Facturación
+        </h2>
 
-            {{-- RUC --}}
-        <div class="mb-6 flex flex-col items-left p-4">
-            <label class="block text-gray-700 font-medium mb-2">RUC</label>
-            <input 
-                type="text" 
-                name="ruc" 
-                class="w-full md:w-3/4 px-4 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" 
-                required
-            >
+        <form action="{{ route('cliente.facturar.pagar', $pedido->id) }}" method="POST">
+        @csrf
+        {{-- Ocultos: serie y correlativo --}}
+        <input type="hidden" name="serie" value="{{ $serie }}">
+        <input type="hidden" name="nextCorrelativo" value="{{ $nextCorrelativo }}">
+
+        {{-- RUC --}}
+        <div class="mb-4">
+            <label for="ruc" class="block text-gray-700 mb-1">RUC</label>
+            <input id="ruc" name="ruc" type="text" value="{{ old('ruc') }}"
+            class="w-full px-4 py-2 border rounded @error('ruc') border-red-500 @enderror"
+            required>
+            @error('ruc')
+            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+            @enderror
         </div>
 
         {{-- Razón Social --}}
-        <div class="mb-6 flex flex-col items-left p-4">
-            <label class="block text-gray-700 font-medium mb-2">Razón Social</label>
-            <input 
-                type="text" 
-                name="razon_social" 
-                class="w-full md:w-3/4 px-4 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" 
-                required
-            >
+        <div class="mb-4">
+            <label for="razon_social" class="block text-gray-700 mb-1">Razón Social</label>
+            <input id="razon_social" name="razon_social" type="text" value="{{ old('razon_social') }}"
+            class="w-full px-4 py-2 border rounded @error('razon_social') border-red-500 @enderror"
+            required>
+            @error('razon_social')
+            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+            @enderror
         </div>
 
         {{-- Dirección Fiscal --}}
-        <div class="mb-6 flex flex-col items-left p-4">
-            <label class="block text-gray-700 font-medium mb-2">Dirección Fiscal</label>
-            <input 
-                type="text" 
-                name="direccion_fiscal" 
-                class="w-full md:w-3/4 px-4 py-2 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none" 
-                required
-            >
+        <div class="mb-4">
+            <label for="direccion_fiscal" class="block text-gray-700 mb-1">Dirección Fiscal</label>
+            <input id="direccion_fiscal" name="direccion_fiscal" type="text" value="{{ old('direccion_fiscal') }}"
+            class="w-full px-4 py-2 border rounded @error('direccion_fiscal') border-red-500 @enderror"
+            required>
+            @error('direccion_fiscal')
+            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+            @enderror
         </div>
 
+        {{-- Tipo de Cliente --}}
+        <div class="mb-4">
+            <label for="tipo_cliente" class="block text-gray-700 mb-1">Tipo de Cliente</label>
+            <select id="tipo_cliente" name="tipo_cliente"
+            class="w-full px-4 py-2 border rounded @error('tipo_cliente') border-red-500 @enderror"
+            required>
+            <option value="">Seleccione...</option>
+            <option value="natural" {{ old('tipo_cliente')=='natural' ? 'selected':'' }}>Persona Natural</option>
+            <option value="juridica" {{ old('tipo_cliente')=='juridica' ? 'selected':'' }}>Persona Jurídica</option>
+            </select>
+            @error('tipo_cliente')
+            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+            @enderror
+        </div>
 
-            {{-- Medio de Pago --}}
-            <div class="mb-8 flex flex-col items-start p-4 space-y-2  ">
-                <label class="block text-gray-700 font-medium">Medio de Pago</label>
-                <select 
-                    name="medio_pago" 
-                    class="w-full md:w-3/4 px-4 py-2    focus:ring-2 focus:outline-none" 
-                    required
-                >
-                    <option value="yape">Yape</option>
-                    <option value="transferencia">Transferencia</option>
-                    <option value="efectivo">Efectivo</option>
-                </select>
-            </div>
+        {{-- Referencia --}}
+        <div class="mb-6">
+            <label for="referencia" class="block text-gray-700 mb-1">Referencia de Dirección</label>
+            <input id="referencia" name="referencia" type="text" value="{{ old('referencia') }}"
+            class="w-full px-4 py-2 border rounded @error('referencia') border-red-500 @enderror">
+            @error('referencia')
+            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+            @enderror
+        </div>
 
+        {{-- Medio de Pago --}}
+        <div class="mb-6">
+            <label for="medio_pago" class="block text-gray-700 mb-1">Medio de Pago</label>
+            <select id="medio_pago" name="medio_pago"
+            class="w-full px-4 py-2 border rounded @error('medio_pago') border-red-500 @enderror"
+            required>
+            <option value="">Seleccione...</option>
+            <option value="yape" {{ old('medio_pago')=='yape' ? 'selected':'' }}>Yape</option>
+            <option value="transferencia" {{ old('medio_pago')=='transferencia' ? 'selected':'' }}>Transferencia</option>
+            <option value="efectivo" {{ old('medio_pago')=='efectivo' ? 'selected':'' }}>Efectivo</option>
+            </select>
+            @error('medio_pago')
+            <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+            @enderror
+        </div>
 
-            {{-- Totales --}}
-            @php
-                $subtotal = $pedido->detalles->sum(fn($d) => $d->cantidad * $d->producto->pvp);
-                $igv = $subtotal * 0.18;
-                $total = $subtotal + $igv;
-            @endphp
-
-            <div class="bg-gray-50 border border-gray-300 p-6 rounded-lg shadow-inner text-gray-800 mb-8 w-full md:w-3/4 mx-auto">
-                <p class="mb-2"><strong>Subtotal:</strong> S/ {{ number_format($subtotal, 2) }}</p>
-                <p class="mb-2"><strong>IGV (18%):</strong> S/ {{ number_format($igv, 2) }}</p>
-                <p class="text-lg font-bold text-indigo-800"><strong>Total a pagar:</strong> S/ {{ number_format($total, 2) }}</p>
-            </div>
-
-            {{-- Botón centrado --}}
-            <div class="d-grid gap-2 d-md-flex justify-content-md-center">
-                <button 
-                    type="submit" 
-                    class="btn btn-primary" type="button"
-                >
-                    💳 Confirmar Facturación
-                </button>
-            </div>
+        {{-- Enviar --}}
+        <div class="text-center">
+            <button type="submit"
+            class="px-6 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">
+            Confirmar y Pagar
+            </button>
+        </div>
         </form>
     </div>
-</div>
+    </div>
 @endsection
