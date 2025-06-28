@@ -13,12 +13,11 @@ class Cliente extends Model
 
     // Campos asignables
     protected $fillable = [
-        'id_usuario',    // modificado: para clave foránea a usuarios
-        'ruc',
-        'razon_social',
-        'numero',
-        'correo',
-        'direccion'
+        'id_usuario',
+        'tipo_cliente',
+        'direccion',
+        'referencia',
+        // aquí puedes agregar más campos propios de cliente
     ];
 
     /**
@@ -31,5 +30,10 @@ class Cliente extends Model
             'id_usuario',   // modificado: FK en clientes
             'id_usuario'    // PK en usuarios
         );
+    }
+
+
+    public function facturaciones() {
+        return $this->hasMany(Facturacion::class, 'id_cliente');
     }
 }

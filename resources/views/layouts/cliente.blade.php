@@ -27,6 +27,20 @@
                     style="object-fit: contain;">               
             Management Control System</a>
         </div>
+        {{-- Si el cliente está autenticado, mostrar botón de logout --}}
+        {{-- Botón de logout empujado a la derecha --}}
+        @auth
+        <form 
+            action="{{ route('cliente.logout') }}" 
+            method="POST" 
+            class="mb-0 ms-auto"
+        >
+            @csrf
+            <button type="submit" class="btn btn-outline-light">
+            <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+            </button>
+        </form>
+        @endauth
     </nav>
         
         

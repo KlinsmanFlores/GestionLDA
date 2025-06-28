@@ -9,6 +9,7 @@ use App\Http\Controllers\PedidoController;
 use App\Http\Controllers\VendedorController;
 use App\Http\Controllers\LogisticaController;
 use App\Http\Controllers\ChoferController;
+use App\Http\Controllers\FacturacionController;
 
 // Página de bienvenida
 Route::get('/', function () {
@@ -19,14 +20,6 @@ Route::get('/', function () {
 Route::get('/admin/login', [AdminLoginController::class, 'create'])->name('admin.login');
 
 Route::post('/admin/login', [AdminLoginController::class, 'store']);
-
-// Redirección por roles
-//Route::get('/admin/usuarios/crear', [UsuarioInternoController::class, 'create'])
-//    ->middleware('auth')->name('admin.usuarios.create');
-
-//Route::post('/admin/usuarios/crear', [UsuarioInternoController::class, 'store'])
-//    ->middleware('auth')->name('admin.usuarios.store');
-
 
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
@@ -44,7 +37,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
         ->where('id_rol', '[345]')
         ->name('usuarios.store');
 
-    // 4. Flujo de tablas hijas, por separado:
+
 
     // 4a. Choferes
     // Mostrar formulario para completar datos de chofer tras crear el usuario
@@ -70,11 +63,6 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
 
 
-
-
-
-
-
 //rutas para registro del cliente
 Route::get('/cliente/registro', [ClienteAuthController::class, 'showRegisterForm'])->name('cliente.register.form');
 Route::post('/cliente/registro', [ClienteAuthController::class, 'register'])->name('cliente.register');
@@ -83,46 +71,62 @@ Route::post('/cliente/registro', [ClienteAuthController::class, 'register'])->na
 Route::get('/cliente/login', [ClienteAuthController::class, 'showLoginForm'])->name('cliente.login.form');
 Route::post('/cliente/login', [ClienteAuthController::class, 'login'])->name('cliente.login');
 
-
-
-
-
-
-
-
-
-
+// Cerrar sesión del cliente
+Route::post('/cliente/logout', [ClienteAuthController::class, 'logout'])
+        ->name('cliente.logout')
+        ->middleware('auth');
 
 
 //rutas crear pedido
 Route::middleware(['auth'])->group(function () {
-    Route::get('/cliente/pedido/crear', [PedidoController::class, 'crear'])->name('cliente.pedido.crear');
-    Route::post('/cliente/pedido/guardar', [PedidoController::class, 'guardar'])->name('cliente.pedido.guardar');
+    // Crear pedido
+    Route::get('/cliente/pedido/crear', [PedidoController::class, 'crear'])
+        ->name('cliente.pedido.crear');
+    Route::post('/cliente/pedido/guardar', [PedidoController::class, 'guardar'])
+        ->name('cliente.pedido.guardar');
+
+    // Editar detalle de pedido
+    Route::get(
+        '/cliente/pedido/detalle/{detalle}/editar',
+        [PedidoController::class, 'editarDetalle']
+    )->name('cliente.pedido.editarDetalle');
+
+    // Actualizar detalle de pedido
+    Route::put(
+        '/cliente/pedido/detalle/{detalle}',
+        [PedidoController::class, 'actualizarDetalle']
+    )->name('cliente.pedido.actualizarDetalle');
+
+    // Eliminar detalle de pedido
+    Route::delete(
+        '/cliente/pedido/detalle/{detalle}',
+        [PedidoController::class, 'eliminarDetalle']
+    )->name('cliente.pedido.eliminarDetalle');
 });
 
 
-
-
-
-
-
-
-
-
-
-
 //rutas de facturacion
-Route::post('/cliente/facturar/{id}', [PedidoController::class, 'facturar'])->name('cliente.facturar');
-Route::get('/cliente/facturar/{id}', [PedidoController::class, 'formularioFacturar'])->name('cliente.facturar.form');
 
 
+Route::middleware('auth')->prefix('cliente')->group(function () {
+    // 1) Formulario de facturación
+    Route::get(
+        'pedido/{id}/facturar',
+        [FacturacionController::class, 'formularioFacturar']
+    )->name('cliente.facturar.form');
 
+    // 2) Procesar pago y crear factura
+    Route::post(
+        'pedido/{id}/facturar',
+        [FacturacionController::class, 'pagar']
+    )->name('cliente.facturar.pagar');
 
-
-
-
-
-
+    // 3) Mostrar factura en solo lectura
+    Route::get(
+        'factura/{id}',
+        [FacturacionController::class, 'mostrarFactura']
+    )->name('cliente.factura.mostrar');
+});
 
 
 
@@ -160,8 +164,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/chofer/pedido/{id}/entregado', [ChoferController::class, 'marcarEntregado'])->name('chofer.pedido.entregado');
     Route::post('/chofer/pedido/{id}/cancelado', [ChoferController::class, 'marcarCancelado'])->name('chofer.pedido.cancelado');
 });
-
-
 
 
 

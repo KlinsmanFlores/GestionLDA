@@ -16,7 +16,7 @@ class ClienteAuthController extends Controller
         return view('auth.cliente-register');
     }
 
-    // Procesar registro
+    // Procesar registro del clinete y lo redirije al web de pedir lso productos
     public function register(Request $request)
     {
         $request->validate([
@@ -39,8 +39,10 @@ class ClienteAuthController extends Controller
         ]);
 
         Auth::login($usuario);
+        $request->session()->regenerate();
 
-        return redirect('/cliente/login');
+        return redirect()->route('cliente.pedido.crear');
+
     }
 
     // Mostrar vista de login
@@ -49,7 +51,7 @@ class ClienteAuthController extends Controller
         return view('auth.cliente-login');
     }
 
-    // Procesar login
+    // Procesar login  inicia sesion y lo manda a la pagina de los pedidos de los productos
     public function login(Request $request)
     {
         $request->validate([
@@ -70,6 +72,18 @@ class ClienteAuthController extends Controller
         Auth::login($usuario);
         $request->session()->regenerate();
 
-        return redirect('/cliente/pedido/crear');
+        return redirect()->route('cliente.pedido.crear');
+
+    }
+    /**
+     * Cierra sesión del cliente y limpia la sesión.
+     */
+    public function logout(Request $request)
+    {
+        Auth::logout();                      // Desconecta al usuario
+        $request->session()->invalidate();    // Invalida la sesión actual
+        $request->session()->regenerateToken();// Regenera el CSRF token
+
+        return redirect('/');                // Redirige a la landing page
     }
 }
