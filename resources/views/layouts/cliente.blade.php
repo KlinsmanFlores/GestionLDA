@@ -3,54 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <title>@yield('titulo', 'Panel Cliente')</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <!-- Font Awesome (iconos de redes sociales) -->
+
+    {{-- Bootstrap CSS --}}
     <link
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-    rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    >
+
+    {{-- Bootstrap Icons --}}
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    >
+
+    {{-- Font Awesome --}}
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+      rel="stylesheet"
     />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+
+    {{-- Google Fonts: Roboto --}}
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto&display=swap"
+      rel="stylesheet"
+    >
+
+    {{-- Tailwind / app.css + app.js via Vite --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    {{-- Bootstrap desde CDN --}}
-    
+
+    {{-- Alpine.js (solo una vez) --}}
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
 </head>
 <body class="bg-light text-info-emphasis">
     <nav class="navbar bg-dark navbar-dark py-3">
         <div class="container d-flex justify-content-center" style="font-family: 'Roboto', sans-serif;">
-            <!-- LOGO y nombre de empresa -->
-            <a class="navbar-brand " href="#">
-                <img src="{{ asset('img/logo2.png') }}" alt="Logo LDA"
-                    width="150" height="150"
-                    class="d-inline-block rounded shadow"
-                    style="object-fit: contain;">               
-            Management Control System</a>
+            <a class="navbar-brand" href="#">
+                <img
+                  src="{{ asset('img/logo2.png') }}"
+                  alt="Logo LDA"
+                  width="150" height="150"
+                  class="d-inline-block rounded shadow"
+                  style="object-fit: contain;"
+                >
+                Management Control System
+            </a>
         </div>
-        {{-- Si el cliente está autenticado, mostrar botón de logout --}}
-        {{-- Botón de logout empujado a la derecha --}}
+
         @auth
-        <form 
-            action="{{ route('cliente.logout') }}" 
-            method="POST" 
-            class="mb-0 ms-auto"
+        <form
+          action="{{ route('cliente.logout') }}"
+          method="POST"
+          class="mb-0 ms-auto"
         >
             @csrf
             <button type="submit" class="btn btn-outline-light">
-            <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+              <i class="bi bi-box-arrow-right"></i> Cerrar sesión
             </button>
         </form>
         @endauth
     </nav>
-        
-        
 
-        <div class="flex-grow-1">
-                <main class="py-6 max-w-5xl mx-auto px-4">
-                    @yield('contenido')
-                </main>
-        </div>
-        
+    <div class="flex-grow-1">
+      <main class="py-6 max-w-5xl mx-auto px-4">
+        @yield('contenido')
+      </main>
+    </div>
 
     <footer
                 class="text-center text-lg-start text-white"
@@ -190,7 +210,8 @@
             <!-- Copyright -->
             
         </footer>
+
+    {{-- Bootstrap JS --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
 </body>
 </html>

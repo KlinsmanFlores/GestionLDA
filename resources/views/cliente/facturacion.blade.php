@@ -95,7 +95,7 @@
         {{-- Enviar --}}
         <div class="text-center">
             <button type="submit"
-            class="px-6 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">
+            class="px-6 py-2 bg-indigo-600 text-black rounded hover:bg-indigo-700 transition">
             Confirmar y Pagar
             </button>
         </div>

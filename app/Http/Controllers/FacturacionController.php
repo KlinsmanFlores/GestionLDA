@@ -112,7 +112,7 @@ class FacturacionController extends Controller
         $pedido->update(['estado_factura' => 'facturado']);
 
         // Mostrar estado del pedido
-        return view('cliente.estado', compact('pedido'));
+        return view('cliente.estado', compact('pedido','factura'));
     }
 
     /**
@@ -127,6 +127,8 @@ class FacturacionController extends Controller
             ->where('estado_factura', 'facturado')
             ->latest('updated_at')
             ->firstOrFail();
+
+            
 
         return view('cliente.factura-ver', compact('factura', 'pedido'));
     }

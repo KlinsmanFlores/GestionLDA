@@ -28,5 +28,14 @@
         class="bg-indigo-600 hover:bg-indigo-700 text-black font-semibold px-6 py-3 rounded-lg shadow-md transition">
         🛒 Hacer otro pedido
     </a>
+
+
+    <a href="{{ route('cliente.factura.mostrar', ['id' => $factura->id_facturacion]) }}"
+        class="bg-indigo-600 hover:bg-indigo-700 text-black font-semibold px-6 py-3 rounded-lg shadow-md transition">
+        🛒 Ver factura
+    </a>
+
+
+
     </div>
 @endsection

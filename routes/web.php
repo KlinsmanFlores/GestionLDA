@@ -10,9 +10,10 @@ use App\Http\Controllers\VendedorController;
 use App\Http\Controllers\LogisticaController;
 use App\Http\Controllers\ChoferController;
 use App\Http\Controllers\FacturacionController;
+use App\Http\Controllers\Admin\FlotaController;
 
 // Página de bienvenida
-Route::get('/', function () {
+Route::get('/inicio', function () {
     return view('welcome');
 });
 
@@ -22,7 +23,6 @@ Route::get('/admin/login', [AdminLoginController::class, 'create'])->name('admin
 Route::post('/admin/login', [AdminLoginController::class, 'store']);
 
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
-
     // 1. Selector de rol
     Route::get('usuarios/roles', [UsuarioInternoController::class, 'chooseRole'])
         ->name('usuarios.roles');
@@ -36,9 +36,6 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::post('usuarios/crear/{id_rol}', [UsuarioInternoController::class, 'store'])
         ->where('id_rol', '[345]')
         ->name('usuarios.store');
-
-
-
     // 4a. Choferes
     // Mostrar formulario para completar datos de chofer tras crear el usuario
     Route::get('choferes/crear/{usuario}', [ChoferController::class, 'create'])
@@ -58,10 +55,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
         ->name('logisticas.create');
     Route::post('logisticas', [LogisticaController::class, 'store'])
         ->name('logisticas.store');
-
 });
-
-
 
 //rutas para registro del cliente
 Route::get('/cliente/registro', [ClienteAuthController::class, 'showRegisterForm'])->name('cliente.register.form');
@@ -106,21 +100,17 @@ Route::middleware(['auth'])->group(function () {
 
 
 //rutas de facturacion
-
-
 Route::middleware('auth')->prefix('cliente')->group(function () {
     // 1) Formulario de facturación
     Route::get(
         'pedido/{id}/facturar',
         [FacturacionController::class, 'formularioFacturar']
     )->name('cliente.facturar.form');
-
     // 2) Procesar pago y crear factura
     Route::post(
         'pedido/{id}/facturar',
         [FacturacionController::class, 'pagar']
     )->name('cliente.facturar.pagar');
-
     // 3) Mostrar factura en solo lectura
     Route::get(
         'factura/{id}',
@@ -129,17 +119,11 @@ Route::middleware('auth')->prefix('cliente')->group(function () {
 });
 
 
-
-
 //ruta del factrua pendiente en el vendedor
 Route::middleware('auth')->group(function () {
     //vendedor
     Route::get('/vendedor/pedidos', [VendedorController::class, 'pedidosPendientes'])->name('vendedor.pedidos');
-    Route::post('/vendedor/pedidos/{id}/confirmar', [VendedorController::class, 'confirmarFactura'])->name('vendedor.confirmar.factura');
-    
-
-    
-
+    Route::post('/vendedor/pedidos/{id}/confirmar', [VendedorController::class, 'confirmarFactura'])->name('vendedor.confirmar.factura'); 
     //logistica page principal
     Route::get('/logistica/pedidos', [LogisticaController::class, 'pedidosPendientes'])->name('logistica.pedidos');
 
@@ -147,7 +131,6 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/logistica/asignar-camion/{id}', [LogisticaController::class, 'asignarCamion'])->name('logistica.asignar.camion');
 });
-
 
 // Módulo del chofer
 Route::middleware('auth')->group(function () {
@@ -157,13 +140,25 @@ Route::middleware('auth')->group(function () {
     Route::post('/chofer/pedido/{id}/cancelado', [ChoferController::class, 'marcarCancelado'])->name('chofer.pedido.cancelado');
 });
 
-
 Route::middleware('auth')->group(function () {
     Route::get('/chofer/guias', [ChoferController::class, 'guiasAsignadas'])->name('chofer.guias');
     Route::get('/chofer/guias/{id}', [ChoferController::class, 'verGuia'])->name('chofer.guia.detalle');
     Route::post('/chofer/pedido/{id}/entregado', [ChoferController::class, 'marcarEntregado'])->name('chofer.pedido.entregado');
     Route::post('/chofer/pedido/{id}/cancelado', [ChoferController::class, 'marcarCancelado'])->name('chofer.pedido.cancelado');
 });
+
+//Administrador CRUD los vehiculos
+Route::middleware(['auth'])
+        ->prefix('admin')
+        ->name('admin.')
+        ->group(function(){
+            Route::resource('flota', FlotaController::class)
+                ->parameters(['flota' => 'flota'])
+                ->except(['show']);
+    });
+
+
+
 
 
 
