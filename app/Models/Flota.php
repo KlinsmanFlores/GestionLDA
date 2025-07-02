@@ -12,10 +12,24 @@ class Flota extends Model
     protected $keyType = 'int';
 
     protected $fillable = [
-        'id_flota', // 👈 Agrega esto para que se pueda usar en create()
         'id_chofer',
+        'marca',
         'placa',
-        'capacidad_volumen_m3',
+        'peso_neto',
+        'peso_bruto_vehicular',
+        'capacidad_carga',
+        'alto_contenedor',
+        'ancho_contenedor',
+        'largo_contenedor',
+    ];
+
+    protected $casts = [
+        'peso_neto'            => 'double',
+        'peso_bruto_vehicular' => 'double',
+        'capacidad_carga'      => 'double',
+        'alto_contenedor'      => 'double',
+        'ancho_contenedor'     => 'double',
+        'largo_contenedor'     => 'double',
     ];
 
     public function chofer()

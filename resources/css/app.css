@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+[x-cloak] { display: none !important; }
 
 .login-bg {
     background: linear-gradient(120deg, #0f044c, #121063, #3e2ecf);
