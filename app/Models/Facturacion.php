@@ -9,6 +9,11 @@ class Facturacion extends Model
 {
     protected $table = 'facturacions';    // o 'facturas' si renombraste la tabla
     protected $primaryKey = 'id_facturacion';
+    
+    public function getKeyName()
+    {
+        return $this->primaryKey;
+    }
     public $timestamps = true;
 
     protected $fillable = [

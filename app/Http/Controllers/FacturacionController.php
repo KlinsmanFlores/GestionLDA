@@ -111,6 +111,11 @@ class FacturacionController extends Controller
         // Marcar pedido como facturado
         $pedido->update(['estado_factura' => 'facturado']);
 
+        $pedido->update([
+            'estado_factura' => 'facturado',
+            'id_cliente'     => $cliente->id_cliente,
+            ]);
+
         // Mostrar estado del pedido
         return view('cliente.estado', compact('pedido','factura'));
     }
@@ -128,8 +133,6 @@ class FacturacionController extends Controller
             ->latest('updated_at')
             ->firstOrFail();
 
-            
-
-        return view('cliente.factura-ver', compact('factura', 'pedido'));
+        return view('cliente.factura-ver', compact('factura','pedido'));
     }
 }

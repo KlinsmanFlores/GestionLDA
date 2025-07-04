@@ -30,7 +30,7 @@
     </a>
 
 
-    <a href="{{ route('cliente.factura.mostrar', ['id' => $factura->id_facturacion]) }}"
+    <a href="{{ route('cliente.factura.mostrar', $factura) }}"
         class="bg-indigo-600 hover:bg-indigo-700 text-black font-semibold px-6 py-3 rounded-lg shadow-md transition">
         🛒 Ver factura
     </a>

@@ -13,7 +13,7 @@ class GuiaDeRemision extends Model
         'camion_id', // este es el nombre correcto según tu migración
         'punto_partida',
         'punto_llegada',
-        'fecha_envio',
+        'fecha_envio' => 'datetime',
     ];
 
     public function pedido()

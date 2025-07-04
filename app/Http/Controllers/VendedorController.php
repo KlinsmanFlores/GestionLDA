@@ -59,15 +59,10 @@ class VendedorController extends Controller
     }
 
 
-
-
-
-
-
     public function pedidosPendientes()
     {
         $pedidos = Pedido::with('detalles.producto')
-            ->where('estado_factura', 'pendiente')
+            ->where('estado', 'pendiente')
             ->get();
 
         return view('vendedor.pedidos', compact('pedidos'));
@@ -94,7 +89,7 @@ class VendedorController extends Controller
             $producto->save();
         }
 
-        $pedido->estado_factura = 'facturado';
+        $pedido->estado = 'recibido';
         $pedido->save();
 
         return redirect()->route('vendedor.pedidos')->with('success', 'Factura confirmada y stock actualizado.');
