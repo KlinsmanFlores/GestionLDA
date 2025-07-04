@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="container">
-    <h2 class="text-xl font-bold mb-4">Pedidos Pendientes por Facturar</h2>
+    <h2 class="text-xl font-bold mb-4">Pedidos Facturados para Enviar a Logística</h2>
 
     {{-- Mensaje flash de éxito --}}
     @if(session('success'))
@@ -23,11 +23,11 @@
             </ul>
             <form action="{{ route('vendedor.confirmar.factura', $pedido->id) }}" method="POST" class="mt-2">
                 @csrf
-                <button type="submit" class="btn btn-primary me-md-2" type="button">Confirmar Factura</button>
+                <button type="submit" class="btn btn-primary">Enviar a logística</button>
             </form>
         </div>
     @empty
-        <p>No hay pedidos pendientes.</p>
+        <p>No hay pedidos facturados pendientes de envío.</p>
     @endforelse
 </div>
 @endsection

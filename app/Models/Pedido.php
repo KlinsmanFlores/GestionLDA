@@ -11,7 +11,9 @@ class Pedido extends Model
     protected $fillable = [
         'id_cliente',
         'fecha',
-        'estado',
+        'estado',         // 
+        'estado_factura', //
+        'estado_envio',   //
     ];
 
     public function cliente()
@@ -39,6 +41,12 @@ class Pedido extends Model
         return $this->detalles->sum(function ($detalle) {
             return $detalle->calcularVolumenTotal();
         });
+    }
+
+    public function facturacion()
+    {
+        return $this->hasOne(Facturacion::class, 'id_facturacion', 'facturacion_id');
+        // O el campo FK que uses para enlazar Pedido → Facturacion
     }
 
 }

@@ -119,18 +119,30 @@ Route::middleware('auth')->prefix('cliente')->group(function () {
 });
 
 
-//ruta del factrua pendiente en el vendedor
+
+
 Route::middleware('auth')->group(function () {
-    //vendedor
+    // — VENDEDOR —
+    // Mostrar facturas pendientes
     Route::get('/vendedor/pedidos', [VendedorController::class, 'pedidosPendientes'])->name('vendedor.pedidos');
     Route::post('/vendedor/pedidos/{id}/confirmar', [VendedorController::class, 'confirmarFactura'])->name('vendedor.confirmar.factura'); 
-    //logistica page principal
-    Route::get('/logistica/pedidos', [LogisticaController::class, 'pedidosPendientes'])->name('logistica.pedidos');
 
-    Route::post('/logistica/pedidos/{id}/enviar', [LogisticaController::class, 'marcarComoEnviado'])->name('logistica.enviar.pedido');
-
-    Route::post('/logistica/asignar-camion/{id}', [LogisticaController::class, 'asignarCamion'])->name('logistica.asignar.camion');
+    // — LOGÍSTICA —
+    Route::get('/logistica/pedidos',      [LogisticaController::class, 'pedidosPendientes'])
+        ->name('logistica.pedidos');
+    Route::post('/logistica/pedidos/{id}/enviar',
+                                        [LogisticaController::class, 'marcarComoEnviado'])
+        ->name('logistica.enviar.pedido');
+    Route::post('/logistica/pedidos/{id}/asignar-camion',
+                                        [LogisticaController::class, 'asignarCamion'])
+        ->name('logistica.asignar.camion');
+    Route::get('/logistica/historial',    [LogisticaController::class, 'historial'])
+        ->name('logistica.historial');
+    Route::get('/logistica/guia/{id}',    [LogisticaController::class, 'mostrarGuia'])
+        ->name('logistica.guia_resumen');
+    Route::get('/logistica/guia/{id}/descargar',[LogisticaController::class, 'descargarGuia'])->name('logistica.descargar.guia');
 });
+
 
 // Módulo del chofer
 Route::middleware('auth')->group(function () {
@@ -156,6 +168,7 @@ Route::middleware(['auth'])
                 ->parameters(['flota' => 'flota'])
                 ->except(['show']);
     });
+
 
 
 

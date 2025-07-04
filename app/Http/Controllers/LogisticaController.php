@@ -2,112 +2,111 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Pedido;
-use App\Models\Flota;
 use App\Models\GuiaDeRemision;
-
-
-
-use App\Models\Usuario;
-use App\Models\Logistica;
+use App\Services\LogisticaService;
+use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
+  
 
 class LogisticaController extends Controller
 {
+    protected LogisticaService $logisticaService;
 
-    public function create(Usuario $usuario)
+    public function __construct(LogisticaService $logisticaService)
     {
-        if ($usuario->id_rol !== 5) {
-            abort(403, 'Acceso denegado: usuario no es logística.');
-        }
-        return view('admin.logisticas.crear', compact('usuario'));
+        //$this->middleware('auth');
+        $this->logisticaService = $logisticaService;
     }
-
-    public function store(Request $request)
-    {
-        $data = $request->validate([
-            'id_usuario'    => 'required|exists:usuarios,id_usuario',
-            'almacen_base'  => 'required|string|max:150',
-            'area_asignada' => 'required|string|max:100',
-        ]);
-
-        $usuario = Usuario::findOrFail($data['id_usuario']);
-        if ($usuario->id_rol !== 5) {
-            abort(403, 'Acceso denegado: usuario no es logística.');
-        }
-
-        Logistica::create([
-            'id_usuario'    => $data['id_usuario'],
-            'almacen_base'  => $data['almacen_base'],
-            'area_asignada' => $data['area_asignada'],
-        ]);
-
-        return redirect()->route('admin.usuarios.roles')
-                        ->with('success', 'Logística registrada correctamente.');
-    }
-
-
-
-
 
     public function pedidosPendientes()
     {
-        $pedidos = Pedido::with('cliente', 'detalles.producto')
-            ->where('estado_factura', 'facturado') // Ya confirmados por el vendedor
-            ->where('estado_envio', 'pendiente') // Aún no enviados
-            ->get();
-
-        return view('logistica.pedidos_pendientes', compact('pedidos'));
+        $pedidos = $this->logisticaService->fetchPendingOrders();
+        return view('logistica.pedidos', compact('pedidos'));
     }
 
-    
     public function marcarComoEnviado($id)
     {
-        $pedido = Pedido::findOrFail($id);
-        $pedido->estado_envio = 'enviado';
-        $pedido->save();
+        $assign = [
+            [
+                'camion'  => null,
+                'pedidos' => collect([Pedido::findOrFail($id)]),
+            ]
+        ];
 
-        return redirect()->route('logistica.pedidos')->with('success', 'Pedido marcado como enviado.');
+        $guias = $this->logisticaService->createGuides($assign);
+
+        return redirect()
+            ->route('logistica.pedidos')
+            ->with('success', "Guía #{$guias->first()->id} generada para el pedido {$id}");
     }
-    
 
     public function asignarCamion($pedidoId)
-    {
-        $pedido = Pedido::with('detalles.producto', 'cliente')->findOrFail($pedidoId);
-        $volumenPedido = $pedido->volumenTotal();
+{
+    // 1) Obtiene el pedido puntual
+    $pedido = $this->logisticaService
+                    ->fetchPendingOrders()
+                    ->firstWhere('id', $pedidoId);
 
-        $camionDisponible = Flota::all()->first(function ($camion) use ($volumenPedido) {
-            $volumenCamion = $camion->alto_contenedor * $camion->ancho_contenedor * $camion->largo_contenedor;
-            return $volumenPedido <= $volumenCamion;
-        });
+    // 2) Planifica asignaciones → devuelve array de assignments
+    $assignments = $this->logisticaService->planAssignments([
+        'Zona Única' => collect([$pedido])
+    ]);
 
-        if (!$camionDisponible) {
-            return back()->with('error', 'No hay camiones con suficiente capacidad.');
-        }
-
-        // Cambiar estado automáticamente a enviado
-        $pedido->update(['estado' => 'enviado']);
-
-
-
-        //dd($camionDisponible);
-
-        /***/
-        // Crear guía de remisión
-        $guia = GuiaDeRemision::create([
-            'pedido_id' => $pedido->id,
-            'camion_id' => $camionDisponible->id_flota, // importante que coincida
-            'fecha_envio' => now(),
-            'punto_partida' => 'Almacén Central',
-            'punto_llegada' => $pedido->cliente->direccion ?? 'Dirección del cliente',
-        ]);
-        $guia->load('flota');
-
-        return view('logistica.guia', compact('guia'));
-
-
+    // Si no hay assignments, manda un error
+    if (empty($assignments)) {
+        return redirect()
+            ->route('logistica.pedidos')
+            ->with('error', 'No hay camiones o choferes disponibles para procesar este pedido.');
     }
 
+    // 3) Crea guías
+    $guias = $this->logisticaService->createGuides($assignments);
+
+    // Si aun así no se creó ninguna guía, también fallo seguro
+    if ($guias->isEmpty()) {
+        return redirect()
+            ->route('logistica.pedidos')
+            ->with('error', 'Ocurrió un problema creando la guía del pedido.');
+    }
+
+    // 4) Redirige con éxito
+    return redirect()
+        ->route('logistica.pedidos')
+        ->with('success',
+            "Pedido #{$pedidoId} asignado. Guía #{$guias->first()->id} generada."
+        );
+}
 
 
+    public function historial()
+    {
+        $guias = GuiaDeRemision::with(['pedido.cliente', 'flota'])
+            ->orderBy('fecha_envio', 'desc')
+            ->paginate(15);
+
+        return view('logistica.historial', compact('guias'));
+    }
+
+    public function mostrarGuia($id)
+    {
+        $guia = GuiaDeRemision::with(['pedido.cliente', 'flota'])
+                ->findOrFail($id);
+
+        return view('logistica.guia_resumen', compact('guia'));
+    }
+
+    public function descargarGuia($id)
+{
+    // 1. Cargar guía con relaciones
+    $guia = GuiaDeRemision::with(['pedido.cliente', 'flota.chofer.usuario'])
+            ->findOrFail($id);
+
+    // 2. Generar PDF desde la vista 'logistica.guia_pdf'
+    $pdf = PDF::loadView('logistica.guia_pdf', compact('guia'))
+                ->setPaper('a4', 'portrait');
+
+    // 3. Devolver descarga
+    return $pdf->download("guia_{$guia->id}.pdf");
+}
 }
