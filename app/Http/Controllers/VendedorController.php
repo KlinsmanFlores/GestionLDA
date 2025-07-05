@@ -95,4 +95,34 @@ class VendedorController extends Controller
         return redirect()->route('vendedor.pedidos')->with('success', 'Factura confirmada y stock actualizado.');
     }
 
+
+        /**
+     * Eliminar un pedido si su estado es 'pendiente' o 'facturado'.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function eliminarPedido($id)
+    {
+        // Busca el pedido o lanza 404
+        $pedido = Pedido::findOrFail($id);
+
+        // Verifica que el estado permita eliminación
+        if (!in_array($pedido->estado, ['pendiente', 'facturado'])) {
+            return redirect()->back()->with('error', "No se puede eliminar un pedido con estado “{$pedido->estado}”.");
+        }
+
+        // Guarda el estado antes de borrar, por si quieres usarlo en el mensaje
+        $estado = $pedido->estado;
+
+        // Elimina el pedido
+        $pedido->delete();
+
+        // Redirige a la lista con mensaje
+        return redirect()
+            ->route('vendedor.pedidos')
+            ->with('success', "Pedido con estado “{$estado}” eliminado correctamente.");
+    }
+
+
 }

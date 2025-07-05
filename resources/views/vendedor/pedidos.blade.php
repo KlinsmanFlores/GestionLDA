@@ -4,10 +4,15 @@
 <div class="container">
     <h2 class="text-xl font-bold mb-4">Pedidos Facturados para Enviar a Logística</h2>
 
-    {{-- Mensaje flash de éxito --}}
+    {{-- Mensajes flash --}}
     @if(session('success'))
         <div class="mb-4 p-3 bg-green-100 text-green-800 border border-green-300 rounded">
             {{ session('success') }}
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="mb-4 p-3 bg-red-100 text-red-800 border border-red-300 rounded">
+            {{ session('error') }}
         </div>
     @endif
 
@@ -21,10 +26,27 @@
                     <li>{{ $detalle->producto->nombre }} - {{ $detalle->cantidad }} unidades</li>
                 @endforeach
             </ul>
-            <form action="{{ route('vendedor.confirmar.factura', $pedido->id) }}" method="POST" class="mt-2">
-                @csrf
-                <button type="submit" class="btn btn-primary">Enviar a logística</button>
-            </form>
+
+            <div class="flex space-x-2 mt-4">
+                {{-- Enviar a logística --}}
+                <form action="{{ route('vendedor.confirmar.factura', $pedido->id) }}" method="POST">
+                    @csrf
+                    <button type="submit" class="btn btn-primary">
+                        Enviar a logística
+                    </button>
+                </form>
+
+                {{-- Eliminar pedido --}}
+                <form action="{{ route('vendedor.pedidos.eliminar', $pedido->id) }}"
+                        method="POST"
+                        onsubmit="return confirm('¿Eliminar pedido #{{ $pedido->id }} con estado {{ $pedido->estado }}?')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger">
+                        Eliminar
+                    </button>
+                </form>
+            </div>
         </div>
     @empty
         <p>No hay pedidos facturados pendientes de envío.</p>

@@ -21,10 +21,13 @@ class LogisticaService
 
     public function fetchPendingOrders(): Collection
     {
-        return Pedido::with(['detalles.producto', 'cliente'])
-            ->where('estado_factura', 'facturado')
-            ->where('estado_envio', 'pendiente')
-            ->get();
+        return Pedido::with([
+            'detalles.producto',
+            'cliente.usuario',    // <–– cargamos Cliente → Usuario
+        ])
+        ->where('estado_factura', 'facturado')
+        ->where('estado_envio', 'pendiente')
+        ->get();
     }
 
     public function groupByZone(Collection $pedidos): array
@@ -62,42 +65,38 @@ class LogisticaService
         return Flota::whereNull('id_chofer')->get();
     }
 
-    public function planAssignments(array $gruposPorZona): array
+    /**
+     * Asigna al $pedido el primer camión y chofer disponibles.
+     * 
+     * @return array ['pedido'=>Pedido, 'camion'=>Flota, 'chofer'=>Chofer] o [] si falla
+     */
+    public function assignByCapacity(Pedido $pedido): ?array
     {
-        $assignments = [];
+        // Todos los camiones, sin filtrar por estado
+        $camiones = Flota::orderBy('id_flota')->get();
 
-        foreach ($gruposPorZona as $zona => $pedidosZona) {
-            $trucks  = $this->findAvailableTrucks($zona);
-            $choferes = Chofer::all();
+        // El primer chofer disponible (o ajusta tu propia regla)
+        $chofer = Chofer::orderBy('id_usuario')->first();
 
-            foreach ($trucks as $camion) {
-                $choferSeleccionado = $choferes->shift();
-                if (! $choferSeleccionado) {
-                    continue 2;
-                }
+        foreach ($camiones as $camion) {
+            // Intentamos empaquetar SOLO este pedido
+            $toAssign = $this->packOrdersIntoTruck(
+                collect([$pedido]),
+                $camion
+            );
 
-                $camion->update(['id_chofer' => $choferSeleccionado->id_usuario]);
-
-                $toAssign = $this->packOrdersIntoTruck($pedidosZona, $camion);
-                if ($toAssign->isEmpty()) {
-                    continue;
-                }
-
-                $assignments[] = [
-                    'zona'    => $zona,
-                    'camion'  => $camion,
-                    'pedidos' => $toAssign,
-                    'chofer'  => $choferSeleccionado,
+            if ($toAssign->isNotEmpty()) {
+                // ¡En este camión cabe!
+                return [
+                    'pedido' => $pedido,
+                    'camion' => $camion,
+                    'chofer' => $chofer,
                 ];
-
-                $pedidosZona = $pedidosZona->diff($toAssign);
-                if ($pedidosZona->isEmpty()) {
-                    break;
-                }
             }
         }
 
-        return $assignments;
+        // No hay ningún camión con suficiente capacidad
+        return null;
     }
 
     public function createGuides(array $assignments): Collection
@@ -115,7 +114,7 @@ class LogisticaService
 
                 $guia = GuiaDeRemision::create([
                     'pedido_id'     => $pedido->id,
-                    'camion_id'     => $camion?->id_flota,
+                    'camion_id'     => $camion->id_flota,      // ← aquí
                     'fecha_envio'   => Carbon::now(),
                     'punto_partida' => 'Almacén Central',
                     'punto_llegada' => $puntoLlegada,

@@ -7,7 +7,9 @@ use App\Models\GuiaDeRemision;
 use App\Services\LogisticaService;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
-  
+use App\Models\Logistica;
+use App\Models\Usuario;
+
 
 class LogisticaController extends Controller
 {
@@ -19,9 +21,43 @@ class LogisticaController extends Controller
         $this->logisticaService = $logisticaService;
     }
 
+    public function create(Usuario $usuario)
+    {
+        if ($usuario->id_rol !== 5) {
+            abort(403, 'Acceso denegado: usuario no es logística.');
+        }
+        return view('admin.logisticas.crear', compact('usuario'));
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'id_usuario'    => 'required|exists:usuarios,id_usuario',
+            'almacen_base'  => 'required|string|max:150',
+            'area_asignada' => 'required|string|max:100',
+        ]);
+
+        $usuario = Usuario::findOrFail($data['id_usuario']);
+        if ($usuario->id_rol !== 5) {
+            abort(403, 'Acceso denegado: usuario no es logística.');
+        }
+
+        Logistica::create([
+            'id_usuario'    => $data['id_usuario'],
+            'almacen_base'  => $data['almacen_base'],
+            'area_asignada' => $data['area_asignada'],
+        ]);
+
+        return redirect()->route('admin.usuarios.roles')
+                        ->with('success', 'Logística registrada correctamente.');
+    }
+
+
+
     public function pedidosPendientes()
     {
         $pedidos = $this->logisticaService->fetchPendingOrders();
+        
         return view('logistica.pedidos', compact('pedidos'));
     }
 
@@ -42,48 +78,58 @@ class LogisticaController extends Controller
     }
 
     public function asignarCamion($pedidoId)
-{
-    // 1) Obtiene el pedido puntual
-    $pedido = $this->logisticaService
-                    ->fetchPendingOrders()
-                    ->firstWhere('id', $pedidoId);
+    {
+        $pedido = Pedido::findOrFail($pedidoId);
 
-    // 2) Planifica asignaciones → devuelve array de assignments
-    $assignments = $this->logisticaService->planAssignments([
-        'Zona Única' => collect([$pedido])
-    ]);
+        $assignment = $this->logisticaService->assignByCapacity($pedido);
 
-    // Si no hay assignments, manda un error
-    if (empty($assignments)) {
+        if (! $assignment) {
+            return redirect()->route('logistica.pedidos')->with('error', 'Ningún camión tiene capacidad para este pedido.');
+        }
+
+        // Guarda vínculo pedido → camión & chofer (ajusta nombres de fk según tu tabla)
+        $pedido->update([
+            'flota_id'   => $assignment['camion']->id,
+            'chofer_id'  => $assignment['chofer']->id_usuario,
+            'estado_envio' => 'asignado',   // si quieres seguir marcando el envío
+        ]);
+
+        // (Opcional) guardar la relación bidireccional en Flota:
+        $assignment['camion']->update([
+            'id_chofer' => $assignment['chofer']->id_usuario,
+        ]);
+
+        // Crea la(s) guía(s) para este pedido
+        $assignments = [[
+            'camion'  => $assignment['camion'],
+            'pedidos' => collect([$pedido]),
+        ]];
+
+        $guias = $this->logisticaService->createGuides($assignments);
+
+        if ($guias->isEmpty()) {
+            return redirect()
+                ->route('logistica.pedidos')
+                ->with('error', 'Ocurrió un problema creando la guía del pedido.');
+        }
+
         return redirect()
             ->route('logistica.pedidos')
-            ->with('error', 'No hay camiones o choferes disponibles para procesar este pedido.');
+            ->with('success',
+                "Pedido #{$pedido->id} asignado a Camión #{$assignment['camion']->id_flota} " .
+                "con Chofer #{$assignment['chofer']->id_usuario}. Guía #{$guias->first()->id} generada."
+            );
     }
-
-    // 3) Crea guías
-    $guias = $this->logisticaService->createGuides($assignments);
-
-    // Si aun así no se creó ninguna guía, también fallo seguro
-    if ($guias->isEmpty()) {
-        return redirect()
-            ->route('logistica.pedidos')
-            ->with('error', 'Ocurrió un problema creando la guía del pedido.');
-    }
-
-    // 4) Redirige con éxito
-    return redirect()
-        ->route('logistica.pedidos')
-        ->with('success',
-            "Pedido #{$pedidoId} asignado. Guía #{$guias->first()->id} generada."
-        );
-}
 
 
     public function historial()
     {
-        $guias = GuiaDeRemision::with(['pedido.cliente', 'flota'])
-            ->orderBy('fecha_envio', 'desc')
-            ->paginate(15);
+        $guias = GuiaDeRemision::with([
+            'pedido.cliente.usuario',  // cargamos Cliente → Usuario
+            'flota.chofer'             // Flota → Usuario (chofer)
+        ])
+        ->orderBy('fecha_envio', 'desc')
+        ->paginate(15);
 
         return view('logistica.historial', compact('guias'));
     }
