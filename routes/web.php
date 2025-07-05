@@ -126,6 +126,7 @@ Route::middleware('auth')->group(function () {
     // Mostrar facturas pendientes
     Route::get('/vendedor/pedidos', [VendedorController::class, 'pedidosPendientes'])->name('vendedor.pedidos');
     Route::post('/vendedor/pedidos/{id}/confirmar', [VendedorController::class, 'confirmarFactura'])->name('vendedor.confirmar.factura'); 
+    Route::delete('/vendedor/pedidos/{id}', [VendedorController::class, 'eliminarPedido'])->name('vendedor.pedidos.eliminar')->middleware('auth');
 
     // — LOGÍSTICA —
     Route::get('/logistica/pedidos',      [LogisticaController::class, 'pedidosPendientes'])

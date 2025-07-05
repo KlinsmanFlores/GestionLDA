@@ -21,12 +21,12 @@
 
                 <div class="px-6 py-4 space-y-2">
                     <p>
-                        <span class="font-medium">Cliente:</span>
-                        {{ $guia->pedido->cliente->nombre }}
+                    <span class="font-medium">Cliente:</span>
+                    {{ optional($guia->pedido->cliente->usuario)->nombre ?? 'N/A' }}
                     </p>
                     <p>
-                        <span class="font-medium">Conductor:</span>
-                        {{ optional($guia->flota->chofer)->usuario->nombre ?? '—' }}
+                    <span class="font-medium">Conductor:</span>
+                    {{ optional($guia->flota->chofer)->nombre ?? '—' }}
                     </p>
                     <p>
                         <span class="font-medium">Vehículo:</span>

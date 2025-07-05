@@ -18,7 +18,7 @@ class Pedido extends Model
 
     public function cliente()
     {
-        return $this->belongsTo(Usuario::class, 'id_cliente');
+        return $this->belongsTo(Cliente::class, 'id_cliente','id_cliente');//cambiado de usuario a client
     }
 
     public function detalles()
