@@ -80,10 +80,10 @@ class ClienteAuthController extends Controller
      */
     public function logout(Request $request)
     {
-        Auth::logout();                      // Desconecta al usuario
-        $request->session()->invalidate();    // Invalida la sesión actual
-        $request->session()->regenerateToken();// Regenera el CSRF token
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
-        return redirect('/');                // Redirige a la landing page
+        return redirect('/cliente/login');
     }
 }

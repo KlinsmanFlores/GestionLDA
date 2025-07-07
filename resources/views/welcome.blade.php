@@ -212,8 +212,8 @@
   <section class="mt-5 container">
     <h2 class="text-center text-2xl fw-bold mb-4 d-flex justify-content-center align-items-center">
       <span>Lo mejor en</span>
-      <img src="{{ asset('img/icon-electro.png') }}" alt="Electro" class="mx-2" style="height:24px;">
-      <span>electro</span>
+      <img src="{{ asset('img/envasados.png') }}" alt="Electro" class="mx-2" style="height:24px;">
+      <span>Alimentos envasados o enlatados</span>
     </h2>
     <div x-data="carouselSection([
       '{{ asset("img/leche.png") }}',
@@ -248,8 +248,8 @@
   <section class="mt-5 container">
     <h2 class="text-center text-2xl fw-bold mb-4 d-flex justify-content-center align-items-center">
       <span>Lo mejor en</span>
-      <img src="{{ asset('img/icon-hogar.png') }}" alt="Hogar" class="mx-2" style="height:24px;">
-      <span>hogar</span>
+      <img src="{{ asset('img/desodorante.png') }}" alt="" class="mx-2" style="height:24px;">
+      <span>Higiene</span>
     </h2>
     <div x-data="carouselSection([
       '{{ asset("img/detergente.png") }}',
@@ -278,8 +278,8 @@
   <section class="mt-5 container mb-5">
     <h2 class="text-center text-2xl fw-bold mb-4 d-flex justify-content-center align-items-center">
       <span>Lo mejor en</span>
-      <img src="{{ asset('img/icon-alimentos.png') }}" alt="Alimentos" class="mx-2" style="height:24px;">
-      <span>alimentos</span>
+      <img src="{{ asset('img/desodorante.png') }}" alt="Alimentos" class="mx-2" style="height:24px;">
+      <span>limpieza</span>
     </h2>
     <div x-data="carouselSection([
       // Añade aquí tus imágenes de alimentos:

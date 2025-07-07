@@ -73,5 +73,11 @@
             📋 Ver Pedidos Asignados
         </a>
     </div>
+    <div class="mb-6 text-right">
+    <a href="{{ route('producto.index') }}"
+       class="inline-block bg-blue-700 hover:bg-blue-800 text-black font-semibold px-5 py-2 rounded-lg shadow transition">
+        🧮 Gestionar Productos
+    </a>
+</div>
 </div>
 @endsection

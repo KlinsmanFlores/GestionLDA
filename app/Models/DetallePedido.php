@@ -36,4 +36,8 @@ class DetallePedido extends Model
             $this->producto->largo
         );
     }
+
+
+
+    
 }

@@ -38,33 +38,34 @@
     ></script>
 </head>
 <body class="bg-light text-info-emphasis">
-    <nav class="navbar bg-dark navbar-dark py-3">
-        <div class="container d-flex justify-content-center" style="font-family: 'Roboto', sans-serif;">
-            <a class="navbar-brand" href="#">
-                <img
-                  src="{{ asset('img/logo2.png') }}"
-                  alt="Logo LDA"
-                  width="150" height="150"
-                  class="d-inline-block rounded shadow"
-                  style="object-fit: contain;"
-                >
-                Management Control System
-            </a>
-        </div>
+            <nav class="navbar bg-dark navbar-dark py-3">
+            <div class="container d-flex justify-content-between align-items-center" style="font-family: 'Roboto', sans-serif;">
+                
+                {{-- Logo y título --}}
+                <a class="navbar-brand d-flex align-items-center" href="#">
+                    <img
+                    src="{{ asset('img/logo2.png') }}"
+                    alt="Logo LDA"
+                    width="50" height="50"
+                    class="d-inline-block rounded shadow me-3"
+                    style="object-fit: contain;">
+                    <span class="fw-bold fs-5 text-white">Management Control System</span>
+                </a>
 
-        @auth
-        <form
-            action="{{ route('cliente.logout') }}"
-            method="POST"
-            class="mb-0 ms-auto"
-            >
-                @csrf
-                <button type="submit" class="btn btn-outline-light">
-                <i class="bi bi-box-arrow-right"></i> Cerrar sesión
-                </button>
-            </form>
-            @endauth
+                {{-- Botón de cerrar sesión (visible solo si está autenticado) --}}
+                @auth
+                <form action="{{ route('cliente.logout') }}" method="POST" class="mb-0">
+                    @csrf
+                    <button type="submit" class="btn btn-outline-light">
+                        <i class="bi bi-box-arrow-right me-1"></i> Cerrar sesión
+                    </button>
+                </form>
+                @endauth
+
+            </div>
         </nav>
+
+
 
         <div class="flex-grow-1">
         <main class="py-6 max-w-5xl mx-auto px-4">
