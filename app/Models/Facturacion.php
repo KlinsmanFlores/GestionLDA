@@ -37,4 +37,9 @@ class Facturacion extends Model
     {
         return $this->belongsTo(Cliente::class, 'id_cliente');
     }
+
+    public function pedido()
+    {
+        return $this->belongsTo(Pedido::class, 'pedido_id');
+    }
 }

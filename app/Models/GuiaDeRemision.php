@@ -18,7 +18,7 @@ class GuiaDeRemision extends Model
 
     public function pedido()
     {
-        return $this->belongsTo(Pedido::class);
+        return $this->belongsTo(Pedido::class, 'pedido_id'); //agregado el pedido_id por el seeder
     }
 
     public function camion() // puedes llamarlo camion o flota, solo asegúrate que coincida
@@ -30,5 +30,8 @@ class GuiaDeRemision extends Model
     {
         return $this->belongsTo(Flota::class, 'camion_id', 'id_flota');
     }
+
+  
+
 
 }

@@ -11,10 +11,11 @@ use App\Http\Controllers\LogisticaController;
 use App\Http\Controllers\ChoferController;
 use App\Http\Controllers\FacturacionController;
 use App\Http\Controllers\Admin\FlotaController;
+use App\Http\Controllers\ProductoController;
 
 // Página de bienvenida
-Route::get('/inicio', function () {
-    return view('welcome');
+Route::get('/', function () {
+    return redirect()->route('inicio');
 });
 
 // Rutas de login para trabajadores (admin, transportistas, etc.)
@@ -66,9 +67,8 @@ Route::get('/cliente/login', [ClienteAuthController::class, 'showLoginForm'])->n
 Route::post('/cliente/login', [ClienteAuthController::class, 'login'])->name('cliente.login');
 
 // Cerrar sesión del cliente
-Route::post('/cliente/logout', [ClienteAuthController::class, 'logout'])
-        ->name('cliente.logout')
-        ->middleware('auth');
+Route::post('/cliente/logout', [ClienteAuthController::class, 'logout'])->name('cliente.logout');
+
 
 
 //rutas crear pedido
@@ -175,7 +175,7 @@ Route::middleware(['auth'])
                 ->except(['show']);
     });
 
-
+Route::resource('producto', ProductoController::class)->middleware(['auth']);
 
 
 
