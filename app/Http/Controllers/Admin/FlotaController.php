@@ -98,9 +98,7 @@ class FlotaController extends Controller
 
         $flota->update($data);
 
-        return redirect()
-            ->route('admin.flota.index')
-            ->with('success', 'Vehículo actualizado correctamente.');
+        return redirect()->route('admin.flota.index')->with('success', 'Vehículo actualizado correctamente.');
     }
 
     /**

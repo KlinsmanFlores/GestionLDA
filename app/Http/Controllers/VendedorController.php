@@ -61,7 +61,7 @@ class VendedorController extends Controller
 
     public function pedidosPendientes()
     {
-        $pedidos = Pedido::with('detalles.producto')
+        $pedidos = Pedido::with('cliente','detalles.producto')   //añadido cliente por los pedidos de vendedor
             ->where('estado', 'pendiente')
             ->get();
 

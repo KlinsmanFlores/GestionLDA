@@ -90,13 +90,16 @@ class LogisticaController extends Controller
         // Guarda vínculo pedido → camión & chofer (ajusta nombres de fk según tu tabla)
         $pedido->update([
             'flota_id'   => $assignment['camion']->id,
-            'chofer_id'  => $assignment['chofer']->id_usuario,
+            'chofer_id'  => $assignment['chofer']->id_chofer,
             'estado_envio' => 'asignado',   // si quieres seguir marcando el envío
         ]);
 
+        $pedido = Pedido::find($pedidoId);
+        
+
         // (Opcional) guardar la relación bidireccional en Flota:
         $assignment['camion']->update([
-            'id_chofer' => $assignment['chofer']->id_usuario,
+            'id_chofer' => $assignment['chofer']->id_chofer,
         ]);
 
         // Crea la(s) guía(s) para este pedido
@@ -125,14 +128,15 @@ class LogisticaController extends Controller
     public function historial()
     {
         $guias = GuiaDeRemision::with([
-            'pedido.cliente.usuario',  // cargamos Cliente → Usuario
-            'flota.chofer'             // Flota → Usuario (chofer)
+            'pedido.cliente.usuario',
+            'flota.chofer.usuario',    // añadimos .usuario aquí
         ])
         ->orderBy('fecha_envio', 'desc')
         ->paginate(15);
 
         return view('logistica.historial', compact('guias'));
     }
+
 
     public function mostrarGuia($id)
     {

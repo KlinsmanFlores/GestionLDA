@@ -36,4 +36,9 @@ class Flota extends Model
     {
         return $this->belongsTo(Chofer::class, 'id_chofer');
     }
+
+    public function guias()
+    {
+        return $this->hasMany(GuiaDeRemision::class, 'flota_id');
+    }
 }

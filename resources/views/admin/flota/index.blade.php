@@ -1,56 +1,89 @@
 @extends('layouts.app')
 
+@section('title', 'Flota de Vehículos')
+
 @section('content')
-<div class="container mx-auto px-4 py-8">
-    <!-- Encabezado con título y botón de creación -->
-    <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-semibold">Flota de Vehículos</h1>
-        <a href="{{ route('admin.flota.create') }}"
-        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-black rounded-lg">
-        + Nuevo Vehículo
+<style>
+    .card-vehiculo {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-left: 5px solid #0d6efd;
+    }
+
+    .card-vehiculo:hover {
+        transform: scale(1.015);
+        box-shadow: 0 0 25px rgba(0, 0, 0, 0.08);
+    }
+
+    .btn-vehiculo {
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+    .btn-vehiculo:hover {
+        transform: scale(1.05);
+    }
+
+    .vehiculo-id {
+        top: 12px;
+        right: 16px;
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+</style>
+
+<div class="container my-5">
+    <!-- Encabezado con título e ícono -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="fw-bold text-dark fs-3">
+            🚚 Flota de Vehículos
+        </h1>
+        <a href="{{ route('admin.flota.create') }}" class="btn btn-primary btn-vehiculo">
+            + Nuevo Vehículo
         </a>
     </div>
 
-    <!-- Listado de vehículos en tarjetas -->
-    <div class="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+    <!-- Listado de tarjetas -->
+    <div class="row g-4">
         @foreach($vehiculos as $v)
-        <div class="bg-white rounded-2xl shadow-lg p-6 relative">
-            {{-- ID del vehículo en la esquina --}}
-            <span class="absolute top-2 right-3 text-sm font-bold text-gray-400">
-            #{{ $v->id_flota }}
-            </span>
+        <div class="col-md-6 col-lg-4">
+            <div class="bg-white p-4 rounded-4 shadow-sm position-relative card-vehiculo h-100">
+                <span class="position-absolute vehiculo-id fw-bold">
+                    #{{ $v->id_flota }}
+                </span>
 
-            <h2 class="text-xl font-bold mb-2">{{ $v->marca }} ({{ $v->placa }})</h2>
+                <h5 class="fw-bold text-dark mb-3">
+                    {{ $v->marca }} ({{ $v->placa }})
+                </h5>
 
-            <ul class="text-gray-700 mb-4 space-y-1">
-            <li><span class="font-medium">Capacidad:</span> {{ $v->capacidad_carga }} kg</li>
-            <li><span class="font-medium">Peso Neto:</span> {{ $v->peso_neto }} kg</li>
-            <li><span class="font-medium">Peso Bruto:</span> {{ $v->peso_bruto_vehicular }} kg</li>
-            <li><span class="font-medium">Dimensiones (A×An×L):</span>
-                {{ $v->alto_contenedor }}×{{ $v->ancho_contenedor }}×{{ $v->largo_contenedor }} cm
-            </li>
-            </ul>
+                <ul class="list-unstyled text-muted mb-4">
+                    <li><strong>Capacidad:</strong> {{ $v->capacidad_carga }} kg</li>
+                    <li><strong>Peso Neto:</strong> {{ $v->peso_neto }} kg</li>
+                    <li><strong>Peso Bruto:</strong> {{ $v->peso_bruto_vehicular }} kg</li>
+                    <li><strong>Dimensiones (A×An×L):</strong><br>
+                        {{ $v->alto_contenedor }}×{{ $v->ancho_contenedor }}×{{ $v->largo_contenedor }} cm
+                    </li>
+                </ul>
 
-            <div class="flex justify-between">
-            <a href="{{ route('admin.flota.edit', $v) }}"
-                class="px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-black rounded-lg text-sm">
-                Editar
-            </a>
-            <form action="{{ route('admin.flota.destroy', $v) }}" method="POST" onsubmit="return confirm('¿Eliminar vehículo?');">
-                @csrf
-                @method('DELETE')
-                <button type="submit"
-                        class="px-4 py-2 bg-red-500 hover:bg-red-600 text-black rounded-lg text-sm">
-                Eliminar
-                </button>
-            </form>
+                <div class="d-flex justify-content-between">
+                    <a href="{{ route('admin.flota.edit', $v) }}"
+                        class="btn btn-warning btn-sm text-dark btn-vehiculo">
+                        ✏️ Editar
+                    </a>
+                    <form action="{{ route('admin.flota.destroy', $v) }}" method="POST" onsubmit="return confirm('¿Eliminar vehículo?');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger btn-sm text-white btn-vehiculo">
+                            🗑 Eliminar
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
         @endforeach
     </div>
 
     <!-- Paginación -->
-    <div class="mt-8">
+    <div class="mt-5">
         {{ $vehiculos->links() }}
     </div>
 </div>
