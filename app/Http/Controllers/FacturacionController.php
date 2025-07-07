@@ -8,6 +8,7 @@ use App\Models\Facturacion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Services\OrderCalculationService;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class FacturacionController extends Controller
 {
@@ -134,5 +135,32 @@ class FacturacionController extends Controller
             ->firstOrFail();
 
         return view('cliente.factura-ver', compact('factura','pedido'));
+    }
+
+    public function descargarPdf(int $facturaId)
+    {
+        // Carga la factura con su cliente y los detalles del pedido
+        $factura = Facturacion::with('cliente')->findOrFail($facturaId);
+
+        $pedido = Pedido::with('detalles.producto')
+            ->where('id_cliente', $factura->id_cliente)
+            ->where('estado_factura', 'facturado')
+            ->latest('updated_at')
+            ->firstOrFail();
+
+        // Genera el PDF usando una vista dedicada
+        $pdf = PDF::loadView(
+            'cliente.factura_pdf',
+            compact('factura', 'pedido')
+        )->setPaper('a4', 'portrait');
+
+        // Descarga el archivo nombrado con serie y correlativo
+        $nombre = sprintf(
+            'Factura_%s-%06d.pdf',
+            $factura->serie,
+            $factura->correlativo
+        );
+
+        return $pdf->download($nombre);
     }
 }

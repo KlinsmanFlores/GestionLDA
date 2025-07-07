@@ -60,16 +60,28 @@ class ChoferController extends Controller
     
     // Mostrar guías asignadas al chofer autenticado
     public function guiasAsignadas()
-    {
-        $choferId = Auth::user()->id; // Usamos el ID del usuario logueado
+{
+    // Obtener el ID del usuario autenticado
+    $usuarioId = Auth::id();
 
-        $guias = GuiaDeRemision::with('pedido', 'flota')
-            ->whereHas('flota', function ($q) use ($choferId) {
-                $q->where('id_chofer', $choferId);
-            })->get();
+    // Buscar el chofer correspondiente al usuario
+    $chofer = \App\Models\Chofer::where('id_usuario', $usuarioId)->first();
 
-        return view('chofer.guias', compact('guias'));
+    // Si no hay chofer, se retorna una vista vacía con mensaje
+    if (!$chofer) {
+        return view('chofer.guias', ['guias' => collect()]);
     }
+
+    // Buscar las guías asignadas al chofer por medio de flota
+    $guias = GuiaDeRemision::with(['pedido.cliente.usuario', 'flota'])
+        ->whereHas('flota', function ($q) use ($chofer) {
+            $q->where('id_chofer', $chofer->id_chofer);
+        })
+        ->get();
+
+    return view('chofer.guias', compact('guias'));
+}
+
 
     // Ver detalles de una guía
     public function verGuia($id)

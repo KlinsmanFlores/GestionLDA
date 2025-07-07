@@ -1,20 +1,20 @@
+/* 1) Tailwind reset/preflight */
 @tailwind base;
+
+/* 2) Ahora Bootstrap CSS, *después* del reset */
+@import "bootstrap/dist/css/bootstrap.min.css";
+
+/* 3) Componentes y utilidades de Tailwind */
 @tailwind components;
 @tailwind utilities;
 
+/* 4) Tus estilos personalizados */
 [x-cloak] { display: none !important; }
 
 .login-bg {
-    background: linear-gradient(120deg, #0f044c, #121063, #3e2ecf);
-    background-size: cover;
-    background-position: center;
+  /* … */
 }
 
 .btn-gradient {
-    background: linear-gradient(to right, #6a11cb, #2575fc);
-    border: none;
-}
-
-.btn-gradient:hover {
-    background: linear-gradient(to right, #5b0ead, #1f60d6);
+  /* … */
 }

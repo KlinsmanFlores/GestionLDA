@@ -116,6 +116,11 @@ Route::middleware('auth')->prefix('cliente')->group(function () {
         'factura/{id}',
         [FacturacionController::class, 'mostrarFactura']
     )->name('cliente.factura.mostrar');
+    // 4) Descargar factura en PDF
+    Route::get(
+        'factura/{id}/descargar',
+        [FacturacionController::class, 'descargarPdf']
+    )->name('cliente.factura.pdf');
 });
 
 
